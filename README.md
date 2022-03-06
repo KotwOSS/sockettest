@@ -3,7 +3,7 @@ SocketTest is an utility written in [rust](https://www.rust-lang.org/) for testi
 
 <br>
 
-[Documentation](https://oss.kotw.dev/kekaccount/docs/)
+[Documentation](https://oss.kotw.dev/sockettest/docs/)
 
 <br>
 
