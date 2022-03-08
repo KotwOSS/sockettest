@@ -1,11 +1,12 @@
+#![allow(unused_variables)]
+
 use std::path::PathBuf;
 use std::str;
 
 use clap::{Parser, Subcommand};
-use tokio::net::TcpStream;
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
-use tokio::io;
+pub mod connect;
+pub mod colors;
 
 #[derive(Parser)]
 #[clap(name = "sockettest", about = "A socket tester for udp and tcp.", long_about = None)]
@@ -46,7 +47,7 @@ enum Commands {
 
         /// The max time for connecting until it will timeout.
         #[clap(long, short, default_value_t = 0, required = false)]
-        timeout: u8,
+        timeout: u64,
     },
 
     /// Sends packets to a socket and waits until it gets a response
@@ -92,49 +93,7 @@ async fn main() {
 
         },
         Commands::Connect { remote, timeout } => {
-            let stream = TcpStream::connect(remote).await
-                .expect("Couldn't connect to socket!");
-
-            let (mut read_stream, mut write_stream) = stream.into_split();
-
-            println!("Successfully connected to socket {}!", remote);
-
-            tokio::join!(
-                async move {
-                    loop {
-                        let mut buf = [0; 1024];
-                        let amount = io::stdin().read(&mut buf).await.expect("Input error:")-1;
-
-                        let mut nbuf = Vec::with_capacity(amount);
-
-                        for i in 0..amount {
-                            nbuf.push(buf[i]);
-                        };
-                        
-                        let line =  str::from_utf8(&nbuf).expect("Invalid UTF-8 sequence:");
-
-                        println!("\x1B[1A\x1B[KSENDING: {}", line);
-                        write_stream.write(&nbuf).await.expect("Socket write error:");
-                    };
-                },
-                async move {
-                    loop {
-                        let mut buf = [0; 1024];
-                        let amount = match read_stream.read(&mut buf).await {
-                            Ok(n) if n == 0 => return,
-                            Ok(n) => n,
-                            Err(e) => {
-                                eprintln!("Failed to read from socket; err = {:?}", e);
-                                return;
-                            }
-                        };
-
-                        let line =  str::from_utf8(&buf).expect("Invalid UTF-8 sequence:");
-        
-                        println!("RECEIVED: {} | {}", amount, line);
-                    };
-                }
-            );
+            connect::main(remote, timeout).await;
         },
     }
 }
