@@ -17,28 +17,21 @@ This project is licensed under the [Mit License](https://mit-license.org/)
 
 ### Prerequirements
 
-- Rust Nightly <br>
-You need [rustup](https://rustup.rs/) to run this.
-
-```sh
-rustup default nightly
-```
+- Rust
 
 <br>
 
-### Building
+### Installing
 ```sh
-cargo build --release
+cargo install --path .
 ```
-
-The executable will be located at `target/release/kekaccount`
 
 <br>
 
 ### Testing
 If you are developing and don't want to rebuild and run the client to release mode use
 ```sh
-cargo run
+cargo run -- <args>
 ```
 
 <hr>
